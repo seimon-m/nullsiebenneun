@@ -1,0 +1,38 @@
+"use client"
+
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+
+export function Navigation({ activeSection }) {
+  const pathname = usePathname()
+
+  const navItems = [
+    { name: "VIDEOS", href: "/", key: "videos" },
+    { name: "INVENTAR", href: "/inventar", key: "inventar" },
+    { name: "AUDIO", href: "/audio", key: "audio" },
+    { name: "DOWNLOAD", href: "/download", key: "download" },
+    { name: "ABOUT", href: "/about", key: "about" },
+  ]
+
+  return (
+    <nav className="bg-white p-6">
+      <div className="flex flex-wrap gap-4">
+        {navItems.map((item) => {
+          const isActive = activeSection === item.key || pathname === item.href
+
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={`px-6 py-3 rounded-full border-2 border-black font-bold text-sm transition-colors ${
+                isActive ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"
+              }`}
+            >
+              {item.name}
+            </Link>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
