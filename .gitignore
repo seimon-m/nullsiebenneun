@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+public/audio/808613__looplicator__demo-track-3089-industraumatic.mp3
+public/placeholders/pexels-paula-schmidt-353488-963486.jpg
+public/videos/4762116-uhd_3840_2160_25fps.mp4
+public/videos/9467247-uhd_4096_2160_25fps.mp4

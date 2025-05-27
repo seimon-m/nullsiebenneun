@@ -46,7 +46,7 @@ export function VideoThumbnail({ video }) {
 
         {/* Video filename overlay on hover */}
         {isHovered && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-opacity-50 flex items-center justify-center">
             <div className="bg-white px-4 py-2 rounded">
               <span className="text-black font-bold text-sm">{video.filename}</span>
             </div>
