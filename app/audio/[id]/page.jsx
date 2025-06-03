@@ -19,6 +19,9 @@ export default function AudioPage({ params }) {
 		notFound();
 	}
 
+	// Ensure we have a fallback for the filename
+	const displayFilename = audio.filename || audio.title || 'Audio File';
+
 	return (
 		<main className="min-h-screen bg-[#1a1a1a] text-white">
 			<div className="container mx-auto px-4 py-12">
@@ -35,7 +38,7 @@ export default function AudioPage({ params }) {
 							{audio.thumbnail ? (
 								<div className="relative w-full h-full">
 									<div className="holographic-effect absolute inset-0 z-10"></div>
-									<Image src={audio.thumbnail} alt={audio.filename} fill className="object-cover z-0" priority />
+									<Image src={audio.thumbnail} alt={displayFilename} fill className="object-cover z-0" priority />
 								</div>
 							) : (
 								<div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#9370db] to-[#ffb6c1] opacity-70">
@@ -50,7 +53,7 @@ export default function AudioPage({ params }) {
 							<div className="border-b border-[#333] pb-6 mb-6">
 								<h1 className="text-5xl font-bold mb-2">{audio.title}</h1>
 								<p className="text-white/70 mt-6">
-									{audio.filename}.wav • {audio.fileSize}
+									{displayFilename}.wav • {audio.fileSize || 'N/A'}
 								</p>
 							</div>
 						</AnimatedItem>
