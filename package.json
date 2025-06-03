@@ -4,8 +4,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "next dev --turbopack",
-		"build": "next build",
+		"dev": "next dev",
+		"build": "next build && next export -o out",
 		"start": "next start",
 		"lint": "next lint",
 		"generate-thumbnails": "node scripts/generate-thumbnails.js"
@@ -16,9 +16,9 @@
 		"clsx": "^2.1.1",
 		"framer-motion": "^12.12.1",
 		"lucide-react": "^0.511.0",
-		"next": "15.2.4",
-		"react": "^19.0.0",
-		"react-dom": "^19.0.0",
+		"next": "^14.2.0",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
 		"tailwind-merge": "^3.3.0"
 	},
 	"devDependencies": {
