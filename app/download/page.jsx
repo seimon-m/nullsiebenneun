@@ -35,7 +35,7 @@ export default function DownloadPage() {
                     )}
                   </button>
                   <div>
-                    <span className="text-lg block">{audio.audioFilename}.wav</span>
+                    <span className="text-lg block">{audio.filename}.wav</span>
                     <span className="text-sm text-gray-500">{audio.fileSize}</span>
                   </div>
                   {playingId === audio.id && (
@@ -43,7 +43,7 @@ export default function DownloadPage() {
                   )}
                 </div>
                 <a
-                  href={`/audio/${audio.audioFilename}.wav`}
+                  href={audio.audioUrl}
                   download
                   className="flex items-center gap-2 px-4 py-2 border-2 border-black rounded-full hover:bg-gray-100 transition-colors"
                 >

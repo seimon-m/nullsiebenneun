@@ -29,12 +29,12 @@ export default function AudioPage({ params }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <AnimatedItem index={1}>
             <div className="relative aspect-square overflow-hidden border border-[#333]">
-              {audio.imageUrl ? (
+              {audio.thumbnail ? (
                 <div className="relative w-full h-full">
                   <div className="holographic-effect absolute inset-0 z-10"></div>
                   <Image
-                    src={audio.imageUrl || "/placeholder.svg"}
-                    alt={audio.title}
+                    src={audio.thumbnail}
+                    alt={audio.filename}
                     fill
                     className="object-cover z-0"
                     priority
@@ -52,19 +52,7 @@ export default function AudioPage({ params }) {
             <AnimatedItem index={2}>
               <div className="border-b border-[#333] pb-6 mb-6">
                 <h1 className="text-5xl font-bold mb-2">{audio.title}</h1>
-
-                <div className="flex flex-wrap gap-2 mt-4">
-                  <span className="text-xs border border-[#ffb6c1] text-[#ffb6c1] px-3 py-1 rounded-full">
-                    {audio.duration}
-                  </span>
-                  {audio.artist && (
-                    <span className="text-xs border border-[#9370db] text-[#9370db] px-3 py-1 rounded-full">
-                      {audio.artist}
-                    </span>
-                  )}
-                </div>
-
-                {audio.description && <p className="text-white/70 mt-6">{audio.description}</p>}
+                <p className="text-white/70 mt-6">{audio.filename}.wav • {audio.fileSize}</p>
               </div>
             </AnimatedItem>
 

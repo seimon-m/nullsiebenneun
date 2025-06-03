@@ -17,16 +17,19 @@ export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
   }, [isPlaying])
 
   return (
-    <div className="flex items-start space-x-4">
+    <div className="flex items-center space-x-4 p-4 border rounded-lg hover:bg-gray-50 transition-colors">
       <button
         onClick={onPlayPause}
-        className="w-16 h-16 flex items-center justify-center bg-black rounded-full flex-shrink-0"
+        className="w-12 h-12 flex items-center justify-center bg-black rounded-full flex-shrink-0"
       >
-        {isPlaying ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white ml-1" />}
+        {isPlaying ? (
+          <Pause className="w-4 h-4 text-white" />
+        ) : (
+          <Play className="w-4 h-4 text-white ml-0.5" />
+        )}
       </button>
-      <div className="flex flex-col">
-        <span className="text-gray-500 text-lg">{audio.audioFilename}</span>
-        <span className="text-gray-500 text-lg">{audio.audioFilename}</span>
+      <div className="flex-1 min-w-0 flex items-center">
+        <p className="text-lg font-medium truncate">{audio.filename}.wav</p>
         <audio ref={audioRef} src={audio.audioUrl} preload="metadata" className="hidden" />
       </div>
     </div>
