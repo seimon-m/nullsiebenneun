@@ -1,15 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: {},
-  },
-  images: {
-    domains: ['nullsiebenneun.vercel.app'],
-    unoptimized: true, // Required for static export
-  },
+  // Enable static export
   output: 'export',
-  // Ensure trailing slash for static export
+  
+  // Disable server-side rendering for static export
   trailingSlash: true,
+  
+  // Configure images for static export
+  images: {
+    unoptimized: true,
+    domains: ['nullsiebenneun.vercel.app'],
+  },
+  
+  // Enable experimental features if needed
+  experimental: {
+    serverActions: true,
+  },
+  
   // Optional: Set the base path if your site is served from a subdirectory
   // basePath: '/your-base-path',
 };

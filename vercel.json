@@ -1,12 +1,6 @@
 {
   "version": 2,
   "buildCommand": "git lfs install && git lfs pull && npm run build",
-  "outputDirectory": "out",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/.*", "dest": "/index.html" }
-  ],
-  "builds": [
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "out" } }
-  ]
+  "outputDirectory": ".next",
+  "framework": "nextjs"
 }
