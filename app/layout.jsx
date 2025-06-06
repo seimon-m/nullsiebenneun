@@ -7,8 +7,8 @@ const spaceGrotesk = Space_Grotesk({
 })
 
 export const metadata = {
-  title: "Video Gallery",
-  description: "A minimalist video gallery",
+  title: "nullsiebenneun",
+  description: "nullsiebenneun archive by vivi jordi",
 }
 
 export default function RootLayout({ children }) {

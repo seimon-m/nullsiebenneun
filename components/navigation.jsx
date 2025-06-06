@@ -16,7 +16,7 @@ export function Navigation({ activeSection }) {
 
   return (
     <nav className="bg-white p-6">
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-2">
         {navItems.map((item) => {
           const isActive = activeSection === item.key || pathname === item.href
 
@@ -24,7 +24,7 @@ export function Navigation({ activeSection }) {
             <Link
               key={item.key}
               href={item.href}
-              className={`px-6 py-3 rounded-full border-2 border-black font-bold text-sm transition-colors ${
+              className={`px-4 py-1 rounded-full border-2 border-black font-bold text-2xl transition-colors ${
                 isActive ? "bg-black text-white" : "bg-white text-black hover:bg-gray-100"
               }`}
             >

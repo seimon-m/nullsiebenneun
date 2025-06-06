@@ -38,20 +38,18 @@ export function VideoThumbnail({ video }) {
     >
       <div className="relative w-full" style={{ aspectRatio: "21/9" }}>
         <Image
-          src={video.thumbnail || "/placeholder.svg?height=400&width=840"}
+          src={video.thumbnail}
           alt={video.title}
           fill
           className="object-cover"
         />
 
         {/* Video filename overlay on hover */}
-        {isHovered && (
-          <div className="absolute inset-0 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white px-4 py-2 rounded">
-              <span className="text-black font-bold text-sm">{video.filename}</span>
-            </div>
+        <div className={`absolute inset-0 flex items-center justify-center transition-opacity duration-200 ease-in-out ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          <div className="relative px-4 py-1 rounded-full border-2 border-black">
+            <span className="text-black font-bold text-lg">{video.filename}</span>
           </div>
-        )}
+        </div>
       </div>
     </Link>
   )

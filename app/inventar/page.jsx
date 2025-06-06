@@ -10,7 +10,7 @@ export default function InventarPage() {
           {/* Fullscreen scrollable image */}
           <div className="relative w-full">
             <Image
-              src="/placeholder.svg?height=2000&width=3000"
+              src="/public/inventar.jpg"
               alt="Inventar"
               width={3000}
               height={2000}

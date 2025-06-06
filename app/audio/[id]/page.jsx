@@ -53,7 +53,8 @@ export default function AudioPage({ params }) {
 							<div className="border-b border-[#333] pb-6 mb-6">
 								<h1 className="text-5xl font-bold mb-2">{audio.title}</h1>
 								<p className="text-white/70 mt-6">
-									{displayFilename}.wav • {audio.fileSize || 'N/A'}
+								sdsd
+									{displayFilename} • {audio.fileSize || 'N/A'}
 								</p>
 							</div>
 						</AnimatedItem>
