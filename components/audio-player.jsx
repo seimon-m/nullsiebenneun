@@ -1,8 +1,8 @@
 "use client"
 
 import { useRef, useState, useEffect } from "react"
-import { Play, Pause } from "lucide-react"
-import { WaveformVisualizer } from "./waveform-visualizer"
+import { Play, Pause, Download } from "lucide-react"
+// import { WaveformVisualizer } from "./waveform-visualizer"
 
 export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
   const audioRef = useRef(null)
@@ -90,6 +90,16 @@ export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
               {formatTime(isPlaying ? currentTime : 0)} / {formatTime(duration)}
             </div>
           </div>
+            
+          <a
+            href={audio.audioUrl}
+            download
+            className="ml-2 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+            title="Download"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Download className="w-4 h-4 text-gray-500" />
+          </a>
 
           <audio
             ref={audioRef}
@@ -101,7 +111,7 @@ export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
           />
         </div>
 
-        <div className="absolute right-4 top-0 bottom-0 w-32">
+        {/* <div className="absolute right-4 top-0 bottom-0 w-32">
           <div className="relative w-full h-full">
             <WaveformVisualizer
               audioUrl={audio.audioUrl}
@@ -110,7 +120,7 @@ export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
               duration={duration || 1}
             />
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   )

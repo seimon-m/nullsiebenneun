@@ -10,12 +10,11 @@ export function Navigation({ activeSection }) {
     { name: "VIDEOS", href: "/", key: "videos" },
     { name: "INVENTAR", href: "/inventar", key: "inventar" },
     { name: "AUDIO", href: "/audio", key: "audio" },
-    { name: "DOWNLOAD", href: "/download", key: "download" },
     { name: "ABOUT", href: "/about", key: "about" },
   ]
 
   return (
-    <nav className="bg-white p-6">
+    <nav className="bg-white p-6 mt-16 md:mt-40">
       <div className="flex flex-wrap gap-2">
         {navItems.map((item) => {
           const isActive = activeSection === item.key || pathname === item.href
