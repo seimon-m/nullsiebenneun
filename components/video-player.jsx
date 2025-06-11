@@ -55,7 +55,7 @@ export function VideoPlayer({ video }) {
 		<div className="min-h-screen bg-white">
 			{/* Back button */}
 			<div className="absolute top-8 left-8 z-50">
-				<Link href="/" className="px-6 py-3 rounded-full border-2 border-black bg-white text-black font-bold text-sm hover:bg-gray-100 transition-colors">
+				<Link href="/" className="px-4 py-1 rounded-full border-2 border-black bg-white text-black font-bold text-2xl hover:bg-gray-100 transition-colors">
 					BACK
 				</Link>
 			</div>
@@ -85,15 +85,15 @@ export function VideoPlayer({ video }) {
 					{/* Play button overlay */}
 					{!isPlaying && showControls && !isLoading && (
 						<div className="absolute inset-0 flex items-center justify-center">
-							<button onClick={togglePlay} className="w-20 h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all">
-								<Play className="w-8 h-8 text-black ml-1" />
+							<button onClick={togglePlay} className="w-12 h-12 lg:w-20 lg:h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all">
+								<Play className="w-6 h-6 lg:w-8 lg:h-8 text-black ml-1" />
 							</button>
 						</div>
 					)}
 
 					{/* Video label */}
-					<div className="absolute bottom-4 right-4">
-						<span className="text-black font-bold text-lg bg-white bg-opacity-80 px-3 py-1 rounded">{video.filename}</span>
+					<div className="m-4 flex justify-end">
+						<span className="text-black font-bold text-lg  px-3 py-1">{video.filename}</span>
 					</div>
 				</div>
 			</div>

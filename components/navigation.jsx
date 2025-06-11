@@ -14,7 +14,7 @@ export function Navigation({ activeSection }) {
   ]
 
   return (
-    <nav className="bg-white p-6 mt-16 md:mt-40">
+    <nav className="bg-white p-6 mt-16 md:mt-30">
       <div className="flex flex-wrap gap-2">
         {navItems.map((item) => {
           const isActive = activeSection === item.key || pathname === item.href
