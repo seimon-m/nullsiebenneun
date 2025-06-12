@@ -25,24 +25,30 @@ export function VideoPlayer({ video }) {
                 if (videoRef.current) {
                     // Unmute the video when user interacts
                     videoRef.current.muted = false;
-                    videoRef.current.play().catch(e => {
-                        console.log('Initial play attempt:', e);
-                        // If play fails, try again with muted (Safari often allows muted autoplay)
-                        if (e.name === 'NotAllowedError') {
-                            videoRef.current.muted = true;
-                            videoRef.current.play().catch(e2 => console.log('Muted play attempt:', e2));
-                        }
-                    });
+                    // For Safari: load() before play() can help with first-click playback
+                    videoRef.current.load();
+                    // Small timeout to ensure Safari has processed the load
+                    setTimeout(() => {
+                        videoRef.current.play().catch(e => {
+                            console.log('Initial play attempt:', e);
+                            // If play fails, try again with muted (Safari often allows muted autoplay)
+                            if (e.name === 'NotAllowedError') {
+                                videoRef.current.muted = true;
+                                videoRef.current.play().catch(e2 => console.log('Muted play attempt:', e2));
+                            }
+                        });
+                    }, 50);
                 }
             }
         };
 
-        window.addEventListener('touchstart', handleUserInteraction, { once: true });
-        window.addEventListener('click', handleUserInteraction, { once: true });
+        // Use capture phase to ensure our handler runs before other click handlers
+        window.addEventListener('touchstart', handleUserInteraction, { once: true, capture: true });
+        window.addEventListener('click', handleUserInteraction, { once: true, capture: true });
 
         return () => {
-            window.removeEventListener('touchstart', handleUserInteraction);
-            window.removeEventListener('click', handleUserInteraction);
+            window.removeEventListener('touchstart', handleUserInteraction, { capture: true });
+            window.removeEventListener('click', handleUserInteraction, { capture: true });
         };
     }, [hasUserInteracted]);
     
@@ -87,12 +93,25 @@ export function VideoPlayer({ video }) {
     const handleVideoClick = () => {
         if (!videoRef.current) return;
 
+        // Set user interaction flag to true on any click
+        setHasUserInteracted(true);
+        
         if (isPlaying) {
             videoRef.current.pause();
         } else {
-            videoRef.current.play().catch(error => {
-                console.error('Error playing video:', error);
-            });
+            // For Safari: load() before play() can help with first-click playback
+            videoRef.current.load();
+            // Small timeout to ensure Safari has processed the load
+            setTimeout(() => {
+                videoRef.current.play().catch(error => {
+                    console.error('Error playing video:', error);
+                    // If regular play fails, try with muted
+                    if (error.name === 'NotAllowedError') {
+                        videoRef.current.muted = true;
+                        videoRef.current.play().catch(e => console.error('Muted fallback failed:', e));
+                    }
+                });
+            }, 50);
         }
     };
 
@@ -198,7 +217,10 @@ export function VideoPlayer({ video }) {
                     {!isPlaying && !isLoading && (
                         <div className="absolute inset-0 flex items-center justify-center">
                             <button
-                                onClick={handleVideoClick}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent event bubbling
+                                    handleVideoClick();
+                                }}
                                 className="w-12 h-12 lg:w-20 lg:h-20 flex items-center justify-center bg-white bg-opacity-80 rounded-full hover:bg-opacity-100 transition-all"
                             >
                                 <Play className="w-6 h-6 lg:w-8 lg:h-8 text-black ml-1" />
