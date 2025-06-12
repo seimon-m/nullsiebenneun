@@ -92,8 +92,8 @@ export function VideoPlayer({ video }) {
 					)}
 
 					{/* Video label */}
-					<div className="m-4 flex justify-end">
-						<span className="text-black font-bold text-lg  px-3 py-1">{video.filename}</span>
+					<div className="absolute -bottom-10 right-3">
+						<span className="text-black font-bold text-md px-2 py-1">{video.filename}</span>
 					</div>
 				</div>
 			</div>
