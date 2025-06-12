@@ -23,7 +23,16 @@ export function VideoPlayer({ video }) {
                 setHasUserInteracted(true);
                 // Try to play video when user first interacts
                 if (videoRef.current) {
-                    videoRef.current.play().catch(e => console.log('Initial play attempt:', e));
+                    // Unmute the video when user interacts
+                    videoRef.current.muted = false;
+                    videoRef.current.play().catch(e => {
+                        console.log('Initial play attempt:', e);
+                        // If play fails, try again with muted (Safari often allows muted autoplay)
+                        if (e.name === 'NotAllowedError') {
+                            videoRef.current.muted = true;
+                            videoRef.current.play().catch(e2 => console.log('Muted play attempt:', e2));
+                        }
+                    });
                 }
             }
         };
@@ -36,6 +45,8 @@ export function VideoPlayer({ video }) {
             window.removeEventListener('click', handleUserInteraction);
         };
     }, [hasUserInteracted]);
+    
+
 
     // Get the video URL with proper encoding
     const getVideoUrl = () => {
@@ -48,9 +59,30 @@ export function VideoPlayer({ video }) {
 
     const videoUrl = getVideoUrl();
 
-    // Add a timestamp to prevent caching issues
-    const cacheBuster = Date.now();
-    const videoSrc = `${videoUrl}?t=${cacheBuster}`;
+    // Use a stable ID for server/client consistency instead of dynamic timestamp
+    // This avoids hydration mismatches while still preventing excessive caching
+    const videoSrc = videoUrl;
+    
+    // Safari-specific setup
+    useEffect(() => {
+        if (videoRef.current) {
+            // Force metadata loading which can help Safari
+            videoRef.current.load();
+            
+            // Add specific event listeners for Safari debugging
+            const video = videoRef.current;
+            const handleLoadedMetadata = () => {
+                console.log('Video metadata loaded');
+                setIsLoading(false);
+            };
+            
+            video.addEventListener('loadedmetadata', handleLoadedMetadata);
+            
+            return () => {
+                video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+            };
+        }
+    }, [videoUrl]);
 
     const handleVideoClick = () => {
         if (!videoRef.current) return;
@@ -105,24 +137,29 @@ export function VideoPlayer({ video }) {
 
                             // Fallback to S3 direct URL if CloudFront fails
                             if (!video.src.includes('s3.amazonaws.com')) {
-                                const filename = video.videoUrl.split('/').pop().trim();
-                                const s3Url = `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com/videos/${encodeURIComponent(filename)}`;
-                                console.log('Falling back to S3 URL:', s3Url);
-                                video.src = s3Url;
-                                video.load(); // Force reload with new source
-                                video.play().catch(e => console.error('Error playing fallback:', e));
+                                const filename = video?.videoUrl?.split('/').pop()?.trim() || video?.filename;
+                                if (filename) {
+                                    const s3Url = `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com/videos/${encodeURIComponent(filename)}`;
+                                    console.log('Falling back to S3 URL:', s3Url);
+                                    video.src = s3Url;
+                                    video.load(); // Force reload with new source
+                                    video.play().catch(e => console.error('Error playing fallback:', e));
+                                }
                             }
                         }}
                         preload="auto"
                         playsInline
                         webkit-playsinline="true"
                         x-webkit-airplay="allow"
+                        muted={!hasUserInteracted}
+                        autoPlay={false}
+                        controls={false}
                         crossOrigin="anonymous"
                         key={videoUrl}
                         aria-label={`Video: ${video.title || 'Video player'}`}
                     >
                         <source
-                            src={`${videoSrc}?X-Amz-Expires=86400&X-Amz-Date=${new Date().toISOString().replace(/[:.-]/g, '')}`}
+                            src={videoSrc}
                             type="video/mp4"
                             onError={(e) => {
                                 console.error('Source error:', e);
@@ -130,18 +167,29 @@ export function VideoPlayer({ video }) {
 
                                 // Try with unencoded spaces if encoded URL fails
                                 if (e.target.src.includes(CLOUDFRONT_DOMAIN)) {
-                                    const filename = video.videoUrl.split('/').pop().trim();
-                                    const unencodedUrl = `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com/videos/${filename.replace(/ /g, '+')}`;
-                                    console.log('Trying with S3 URL (unencoded spaces):', unencodedUrl);
+                                    const filename = video?.videoUrl?.split('/').pop()?.trim() || video?.filename;
+                                    if (filename) {
+                                        // Try different URL formats that Safari might accept better
+                                        const unencodedUrl = `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com/videos/${filename.replace(/ /g, '+')}`;                                    
+                                        console.log('Trying with S3 URL (unencoded spaces):', unencodedUrl);
 
-                                    // If we have a video element reference, update it directly
-                                    if (videoRef.current) {
-                                        videoRef.current.src = unencodedUrl;
-                                        videoRef.current.load();
-                                        videoRef.current.play().catch(err => console.error('Error playing S3 fallback:', err));
+                                        // If we have a video element reference, update it directly
+                                        if (videoRef.current) {
+                                            videoRef.current.src = unencodedUrl;
+                                            videoRef.current.load();
+                                            // Don't autoplay immediately as Safari might block it
+                                            if (hasUserInteracted) {
+                                                videoRef.current.play().catch(err => console.error('Error playing S3 fallback:', err));
+                                            }
+                                        }
                                     }
                                 }
                             }}
+                        />
+                        {/* Add additional source for Safari compatibility */}
+                        <source
+                            src={videoSrc}
+                            type="video/quicktime"
                         />
                         Your browser does not support the video tag.
                     </video>
