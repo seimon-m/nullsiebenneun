@@ -118,7 +118,6 @@ export function VideoPlayer({ video }) {
                         webkit-playsinline="true"
                         x-webkit-airplay="allow"
                         crossOrigin="anonymous"
-                        muted
                         key={videoUrl}
                         aria-label={`Video: ${video.title || 'Video player'}`}
                     >
