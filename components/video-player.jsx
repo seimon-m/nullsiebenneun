@@ -14,7 +14,17 @@ export function VideoPlayer({ video }) {
     const [showControls, setShowControls] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const [hasUserInteracted, setHasUserInteracted] = useState(false);
+    const [isSafari, setIsSafari] = useState(false);
     const videoRef = useRef(null);
+    
+    // Detect Safari browser
+    useEffect(() => {
+        const ua = window.navigator.userAgent;
+        const isSafariBrowser = /^((?!chrome|android).)*safari/i.test(ua) || 
+                              /iPad|iPhone|iPod/.test(ua);
+        setIsSafari(isSafariBrowser);
+        console.log('Is Safari browser:', isSafariBrowser);
+    }, []);
 
     // Handle user interaction for iOS Safari
     useEffect(() => {
@@ -98,20 +108,41 @@ export function VideoPlayer({ video }) {
         
         if (isPlaying) {
             videoRef.current.pause();
+            setIsPlaying(false);
         } else {
-            // For Safari: load() before play() can help with first-click playback
-            videoRef.current.load();
-            // Small timeout to ensure Safari has processed the load
-            setTimeout(() => {
+            // Special handling for Safari
+            if (isSafari) {
+                // Force video to be ready for Safari
+                videoRef.current.muted = true; // Start muted for better chance of success
+                videoRef.current.currentTime = 0;
+                videoRef.current.load();
+                
+                // Use a longer timeout for Safari
+                setTimeout(() => {
+                    const playPromise = videoRef.current.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            // Success - unmute after successful play
+                            console.log('Safari play successful');
+                            videoRef.current.muted = false;
+                            setIsPlaying(true);
+                        }).catch(error => {
+                            console.error('Safari play error:', error);
+                            // Try one more time with different approach
+                            videoRef.current.controls = true; // Show native controls as fallback
+                            videoRef.current.play().catch(e => {
+                                console.error('Final play attempt failed:', e);
+                            });
+                        });
+                    }
+                }, 100);
+            } else {
+                // Normal handling for other browsers
                 videoRef.current.play().catch(error => {
                     console.error('Error playing video:', error);
-                    // If regular play fails, try with muted
-                    if (error.name === 'NotAllowedError') {
-                        videoRef.current.muted = true;
-                        videoRef.current.play().catch(e => console.error('Muted fallback failed:', e));
-                    }
                 });
-            }, 50);
+            }
         }
     };
 
@@ -136,14 +167,26 @@ export function VideoPlayer({ video }) {
 
                     <video
                         ref={videoRef}
-                        className="w-full h-full object-cover [&::-webkit-media-controls]:hidden [&::-webkit-media-controls-enclosure]:hidden [&::-webkit-media-controls-panel]:hidden"
+                        className={`w-full h-full object-cover ${!isSafari ? '[&::-webkit-media-controls]:hidden [&::-webkit-media-controls-enclosure]:hidden [&::-webkit-media-controls-panel]:hidden' : ''}`}
                         onClick={handleVideoClick}
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
+                        onPlay={() => {
+                            console.log('Video play event');
+                            setIsPlaying(true);
+                        }}
+                        onPause={() => {
+                            console.log('Video pause event');
+                            setIsPlaying(false);
+                        }}
                         onEnded={() => setIsPlaying(false)}
                         onCanPlay={() => {
                             console.log('Video can play');
                             setIsLoading(false);
+                            
+                            // For Safari: try to play immediately when canplay fires if user has interacted
+                            if (isSafari && hasUserInteracted && !isPlaying) {
+                                console.log('Attempting Safari autoplay on canplay');
+                                videoRef.current.play().catch(e => console.log('Autoplay on canplay failed:', e));
+                            }
                         }}
                         onError={(e) => {
                             console.error('Video error:', e);
