@@ -90,15 +90,15 @@ export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
               {formatTime(isPlaying ? currentTime : 0)} / {formatTime(duration)}
             </div>
           </div>
-            
+
           <a
             href={audio.audioUrl}
             download
-            className="ml-2 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+            className="ml-2 p-3 rounded-full hover:bg-gray-100 transition-colors"
             title="Download"
             onClick={(e) => e.stopPropagation()}
           >
-            <Download className="w-4 h-4 text-gray-500" />
+            <Download className="w-4 h-4 text-gray-900" />
           </a>
 
           <audio
