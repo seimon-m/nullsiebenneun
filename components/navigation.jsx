@@ -8,7 +8,6 @@ export function Navigation({ activeSection }) {
 
   const navItems = [
     { name: "VIDEOS", href: "/", key: "videos" },
-    { name: "INVENTAR", href: "/inventar", key: "inventar" },
     { name: "AUDIO", href: "/audio", key: "audio" },
     { name: "ABOUT", href: "/about", key: "about" },
   ]
