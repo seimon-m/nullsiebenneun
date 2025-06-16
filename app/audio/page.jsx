@@ -17,7 +17,7 @@ export default function AudioPage() {
 		<main className="min-h-screen bg-white">
 			<div className="pt-8">
 				<Navigation activeSection="audio" />
-				<div className="pt-8 px-4">
+				<div className="px-4">
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 						{audioFiles.map((audio) => (
 							<AudioPlayer key={audio.id} audio={audio} isPlaying={audio.id === playingId} onPlayPause={() => handlePlay(audio.id)} />
