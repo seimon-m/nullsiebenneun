@@ -1,33 +1,11 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 
 export function VideoThumbnail({ video }) {
   const [isHovered, setIsHovered] = useState(false)
-  const videoRef = useRef(null)
-  const [isPreloaded, setIsPreloaded] = useState(false)
-
-  // Preload video when component mounts
-  useEffect(() => {
-    const preloadVideo = () => {
-      const link = document.createElement("link")
-      link.rel = "preload"
-      link.href = video.videoUrl
-      link.as = "video"
-      document.head.appendChild(link)
-      setIsPreloaded(true)
-    }
-
-    preloadVideo()
-
-    return () => {
-      // Clean up preload link when component unmounts
-      const links = document.head.querySelectorAll(`link[href="${video.videoUrl}"]`)
-      links.forEach((link) => document.head.removeChild(link))
-    }
-  }, [video.videoUrl])
 
   return (
     <Link
