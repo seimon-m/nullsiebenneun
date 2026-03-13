@@ -26,29 +26,11 @@ export function VideoPlayer({ video }) {
         console.log('Is Safari browser:', isSafariBrowser);
     }, []);
 
-    // Handle user interaction for iOS Safari
+    // Handle user interaction tracking
     useEffect(() => {
         const handleUserInteraction = () => {
             if (!hasUserInteracted) {
                 setHasUserInteracted(true);
-                // Try to play video when user first interacts
-                if (videoRef.current) {
-                    // Unmute the video when user interacts
-                    videoRef.current.muted = false;
-                    // For Safari: load() before play() can help with first-click playback
-                    videoRef.current.load();
-                    // Small timeout to ensure Safari has processed the load
-                    setTimeout(() => {
-                        videoRef.current.play().catch(e => {
-                            console.log('Initial play attempt:', e);
-                            // If play fails, try again with muted (Safari often allows muted autoplay)
-                            if (e.name === 'NotAllowedError') {
-                                videoRef.current.muted = true;
-                                videoRef.current.play().catch(e2 => console.log('Muted play attempt:', e2));
-                            }
-                        });
-                    }, 50);
-                }
             }
         };
 
@@ -108,39 +90,23 @@ export function VideoPlayer({ video }) {
         
         if (isPlaying) {
             videoRef.current.pause();
-            setIsPlaying(false);
         } else {
-            // Special handling for Safari
-            if (isSafari) {
-                // Force video to be ready for Safari
-                videoRef.current.muted = true; // Start muted for better chance of success
-                videoRef.current.currentTime = 0;
-                videoRef.current.load();
-                
-                // Use a longer timeout for Safari
-                setTimeout(() => {
-                    const playPromise = videoRef.current.play();
-                    
-                    if (playPromise !== undefined) {
-                        playPromise.then(() => {
-                            // Success - unmute after successful play
-                            console.log('Safari play successful');
-                            videoRef.current.muted = false;
-                            setIsPlaying(true);
-                        }).catch(error => {
-                            console.error('Safari play error:', error);
-                            // Try one more time with different approach
-                            videoRef.current.controls = true; // Show native controls as fallback
-                            videoRef.current.play().catch(e => {
-                                console.error('Final play attempt failed:', e);
-                            });
-                        });
+            // Ensure video is unmuted when user explicitly clicks play
+            videoRef.current.muted = false;
+            
+            // Direct synchronous play call is required by Safari and Android
+            // Do not put this in a setTimeout
+            const playPromise = videoRef.current.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('Playback started successfully');
+                }).catch(error => {
+                    console.error('Play error:', error);
+                    // Fallback: show controls if play fails so user can manually try again
+                    if (videoRef.current) {
+                        videoRef.current.controls = true;
                     }
-                }, 100);
-            } else {
-                // Normal handling for other browsers
-                videoRef.current.play().catch(error => {
-                    console.error('Error playing video:', error);
                 });
             }
         }
@@ -216,7 +182,6 @@ export function VideoPlayer({ video }) {
                         muted={!hasUserInteracted}
                         autoPlay={false}
                         controls={false}
-                        crossOrigin="anonymous"
                         key={videoUrl}
                         aria-label={`Video: ${video.title || 'Video player'}`}
                     >
@@ -247,11 +212,6 @@ export function VideoPlayer({ video }) {
                                     }
                                 }
                             }}
-                        />
-                        {/* Add additional source for Safari compatibility */}
-                        <source
-                            src={videoSrc}
-                            type="video/quicktime"
                         />
                         Your browser does not support the video tag.
                     </video>
