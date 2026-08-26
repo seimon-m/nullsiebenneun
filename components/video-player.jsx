@@ -3,11 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Play, Loader } from 'lucide-react';
-
-// CloudFront Configuration
-const CLOUDFRONT_DOMAIN = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
-const S3_BUCKET = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
-const S3_REGION = process.env.NEXT_PUBLIC_AWS_REGION;
+import { getMediaUrl } from '@/lib/media';
 
 export function VideoPlayer({ video }) {
     const [isPlaying, setIsPlaying] = useState(false);
@@ -46,19 +42,7 @@ export function VideoPlayer({ video }) {
     
 
 
-    // Get the video URL with proper encoding
-    const getVideoUrl = () => {
-        if (!video?.videoUrl) return '';
-        const filename = video.videoUrl.split('/').pop().trim();
-        // Properly encode the filename but keep forward slashes
-        const encodedFilename = encodeURIComponent(filename).replace(/%2F/g, '/');
-        return `https://${CLOUDFRONT_DOMAIN}/${encodedFilename}`;
-    };
-
-    const videoUrl = getVideoUrl();
-
-    // Use a stable ID for server/client consistency instead of dynamic timestamp
-    // This avoids hydration mismatches while still preventing excessive caching
+    const videoUrl = getMediaUrl(video?.videoUrl);
     const videoSrc = videoUrl;
     
     // Safari-specific setup
@@ -155,24 +139,11 @@ export function VideoPlayer({ video }) {
                             }
                         }}
                         onError={(e) => {
-                            console.error('Video error:', e);
-                            console.error('Video error details:', e.target.error);
-
-                            // Try to get more detailed error information
-                            const video = e.target;
-                            console.log('Video network state:', video.networkState);
-                            console.log('Video ready state:', video.readyState);
-
-                            // Fallback to S3 direct URL if CloudFront fails
-                            if (!video.src.includes('s3.amazonaws.com')) {
-                                const filename = video?.videoUrl?.split('/').pop()?.trim() || video?.filename;
-                                if (filename) {
-                                    const s3Url = `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com/videos/${encodeURIComponent(filename)}`;
-                                    console.log('Falling back to S3 URL:', s3Url);
-                                    video.src = s3Url;
-                                    video.load(); // Force reload with new source
-                                    video.play().catch(e => console.error('Error playing fallback:', e));
-                                }
+                            console.error('Video error:', e.target.error);
+                            setIsLoading(false);
+                            // Surface native controls so the user can retry manually
+                            if (videoRef.current) {
+                                videoRef.current.controls = true;
                             }
                         }}
                         preload="auto"
@@ -185,34 +156,7 @@ export function VideoPlayer({ video }) {
                         key={videoUrl}
                         aria-label={`Video: ${video.title || 'Video player'}`}
                     >
-                        <source
-                            src={videoSrc}
-                            type="video/mp4"
-                            onError={(e) => {
-                                console.error('Source error:', e);
-                                console.error('Source element:', e.target);
-
-                                // Try with unencoded spaces if encoded URL fails
-                                if (e.target.src.includes(CLOUDFRONT_DOMAIN)) {
-                                    const filename = video?.videoUrl?.split('/').pop()?.trim() || video?.filename;
-                                    if (filename) {
-                                        // Try different URL formats that Safari might accept better
-                                        const unencodedUrl = `https://${S3_BUCKET}.s3.${S3_REGION}.amazonaws.com/videos/${filename.replace(/ /g, '+')}`;                                    
-                                        console.log('Trying with S3 URL (unencoded spaces):', unencodedUrl);
-
-                                        // If we have a video element reference, update it directly
-                                        if (videoRef.current) {
-                                            videoRef.current.src = unencodedUrl;
-                                            videoRef.current.load();
-                                            // Don't autoplay immediately as Safari might block it
-                                            if (hasUserInteracted) {
-                                                videoRef.current.play().catch(err => console.error('Error playing S3 fallback:', err));
-                                            }
-                                        }
-                                    }
-                                }
-                            }}
-                        />
+                        <source src={videoSrc} type="video/mp4" />
                         Your browser does not support the video tag.
                     </video>
 

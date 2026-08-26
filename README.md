@@ -9,7 +9,7 @@ hinterlässt seine Spuren
 im Archiv «nullsiebenneun»
 
 ## Overview
-A Next.js application that serves as a video archive. The video files are hosted on AWS S3 and delivered via CloudFront to avoid hitting GitHub LFS bandwidth limits and to ensure fast playback across all devices.
+A Next.js application that serves as a video archive. All large media (videos under `videos/`, audio under `audio/`) is hosted in a Cloudflare R2 bucket (free plan, no egress fees) and served via its public bucket URL. Thumbnails are small and live in the repo under `public/thumbnails/`.
 
 ## Local Setup
 
@@ -19,16 +19,20 @@ npm install
 ```
 
 ### 2. Environment Variables
-Create a `.env.local` file in the root directory and configure your AWS/CloudFront credentials:
+Create a `.env.local` file in the root directory and set the public base URL of the R2 bucket (the `r2.dev` URL from the Cloudflare dashboard, or a custom domain later):
 ```env
-NEXT_PUBLIC_CLOUDFRONT_DOMAIN="your-cloudfront-domain.cloudfront.net"
-NEXT_PUBLIC_S3_BUCKET_NAME="your-s3-bucket-name"
-NEXT_PUBLIC_AWS_REGION="your-aws-region"
+NEXT_PUBLIC_MEDIA_BASE_URL="https://pub-xxxxxxxxxxxxxxxx.r2.dev"
 ```
+If the variable is unset, media URLs fall back to relative paths and are served from `public/` — handy for local development with local files.
 
 ### 3. Media Files
-Local video files should be placed in `public/videos/`. 
-*(Note: This folder is deliberately gitignored so large video files are not tracked by the repo, avoiding Git LFS bandwidth limits.)*
+Local video/audio files can be placed in `public/videos/` and `public/audio/`.
+*(Both folders are gitignored so large media files are not tracked by the repo or uploaded on every deploy.)*
+
+To upload audio files to R2 (after `npx wrangler login`):
+```bash
+./scripts/upload-audio-r2.sh <bucket-name>
+```
 
 ### 4. Generate Thumbnails & Data
 If you add new videos, run the helper script to generate thumbnails and update the `lib/data.js` manifest:

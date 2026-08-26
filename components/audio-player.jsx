@@ -2,13 +2,16 @@
 
 import { useRef, useState, useEffect } from "react"
 import { Play, Pause, Download } from "lucide-react"
+import { getMediaUrl } from "@/lib/media"
 // import { WaveformVisualizer } from "./waveform-visualizer"
 
 export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
   const audioRef = useRef(null)
   const [duration, setDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
+  const [isDownloading, setIsDownloading] = useState(false)
   const displayName = audio?.filename || audio?.title || 'Audio File'
+  const audioUrl = getMediaUrl(audio?.audioUrl)
 
   // Handle play/pause and time updates
   useEffect(() => {
@@ -39,10 +42,6 @@ export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
     }
   }, [isPlaying, duration])
 
-  if (!audio?.audioUrl) {
-    return null;
-  }
-
   // Load duration when audio URL changes
   useEffect(() => {
     if (audioRef.current) {
@@ -64,7 +63,37 @@ export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
         audioRef.current?.removeEventListener('loadedmetadata', handleLoadedMetadata);
       };
     }
-  }, [audio.audioUrl]);
+  }, [audioUrl]);
+
+  // The download attribute is ignored for cross-origin URLs (files live on R2),
+  // so fetch the file and save it via a blob URL instead.
+  const handleDownload = async (e) => {
+    e.stopPropagation();
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      const response = await fetch(audioUrl);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = audio.audioUrl.split('/').pop();
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed, opening in new tab instead:', error);
+      window.open(audioUrl, '_blank', 'noopener');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  if (!audio?.audioUrl) {
+    return null;
+  }
 
   return (
     <div className="w-full group relative overflow-hidden rounded-lg border border-gray-200 hover:shadow-sm transition-shadow bg-white">
@@ -91,19 +120,19 @@ export function AudioPlayer({ audio, isPlaying, onPlayPause }) {
             </div>
           </div>
 
-          <a
-            href={audio.audioUrl}
-            download
-            className="ml-2 p-3 rounded-full hover:bg-gray-100 transition-colors"
+          <button
+            type="button"
+            className="ml-2 p-3 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
             title="Download"
-            onClick={(e) => e.stopPropagation()}
+            onClick={handleDownload}
+            disabled={isDownloading}
           >
-            <Download className="w-4 h-4 text-gray-900" />
-          </a>
+            <Download className={`w-4 h-4 text-gray-900 ${isDownloading ? 'animate-pulse' : ''}`} />
+          </button>
 
           <audio
             ref={audioRef}
-            src={audio.audioUrl}
+            src={audioUrl}
             preload="metadata"
             className="hidden"
             onError={(e) => console.error("Audio load error:", e)}

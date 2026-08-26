@@ -20,8 +20,9 @@
 # production
 /build
 
-# media
+# media (served from Cloudflare R2, not from the repo)
 /public/videos/
+/public/audio/
 
 # misc
 .DS_Store
